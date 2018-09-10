@@ -111,7 +111,7 @@ std::vector<Defibrilator> buildDefibrilatorList(int numberOfDefibrilators)
 	return defibrilatorList;
 }
 
-double computeDistanceBetweenTwoDefibrilators(const Coordinates & point1, const Coordinates & point2)
+double computeDistanceBetweenTwoPoints(const Coordinates & point1, const Coordinates & point2)
 {
 	double x = (point2.lon_ - point1.lon_) * cos((point1.lat_ + point2.lat_) / 2);
 	double y = point2.lat_ - point1.lat_;
@@ -127,7 +127,7 @@ std::size_t getClosestDefribilatorIndex(const std::vector<Defibrilator> & defibr
 	{
 		const Defibrilator & defibrilator = defibrilators[index];
 
-		double distanceToInputPoint = computeDistanceBetweenTwoDefibrilators(inputPoint, defibrilator.coordinates_);
+		double distanceToInputPoint = computeDistanceBetweenTwoPoints(inputPoint, defibrilator.coordinates_);
 
 		if (distanceToInputPoint < minimumDistanceToInputPoint)
 		{
