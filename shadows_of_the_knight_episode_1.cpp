@@ -3,79 +3,79 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
-#include <algorithm>
-#include <math.h>
-
-// Constants for directons
-static const std::string kUpString("U");
-static const std::string kUpRightString("UR");
-static const std::string kRightString("R");
-static const std::string kDownRightString("DR");
-static const std::string kDownString("D");
-static const std::string kDownLeftString("DL");
-static const std::string kLeftString("L");
-static const std::string kUpLeftString("UL");
+#include <unordered_map>
 
 // Class to represent a direction of Batman in the building
 class Direction
 {
+private:
+    enum class DirectionValue {UP,
+        UP_LEFT,
+        UP_RIGHT,
+        DOWN,
+        DOWN_LEFT,
+        DOWN_RIGHT,
+        LEFT,
+        RIGHT,
+        UNDEFINED};
+
 public:
-    Direction(): value_("") {}
-
-    Direction(const std::string & value): value_(value) {}
-
-    bool operator ==(const Direction & otherDirection) const
+    Direction(const std::string & stringValue): value_(DirectionValue::UNDEFINED)
     {
-        return value_ == otherDirection.value_;
-    }
+        static std::unordered_map<std::string, DirectionValue> stringToDirectionMap = {
+            {"U", DirectionValue::UP},
+            {"UL", DirectionValue::UP_LEFT},
+            {"UR", DirectionValue::UP_RIGHT},
+            {"D", DirectionValue::DOWN},
+            {"DL", DirectionValue::DOWN_LEFT},
+            {"DR", DirectionValue::DOWN_RIGHT},
+            {"L", DirectionValue::LEFT},
+            {"R", DirectionValue::RIGHT}};
 
-    bool operator ==(const std::string & value) const
-    {
-        return value_ == value;
+        if (stringToDirectionMap.find(stringValue) != stringToDirectionMap.end())
+        {
+            value_ = stringToDirectionMap[stringValue];
+        }
     }
 
     bool goesUp() const
     {
-        return (value_ == kUpString)
-            || (value_ == kUpLeftString)
-            || (value_ == kUpRightString);
+        return (value_ == DirectionValue::UP)
+            || (value_ == DirectionValue::UP_LEFT)
+            || (value_ == DirectionValue::UP_RIGHT);
     }
 
     bool goesDown() const
     {
-        return (value_ == kDownString)
-            || (value_ == kDownLeftString)
-            || (value_ == kDownRightString);
+        return (value_ == DirectionValue::DOWN)
+            || (value_ == DirectionValue::DOWN_LEFT)
+            || (value_ == DirectionValue::DOWN_RIGHT);
     }
 
     bool goesLeft() const
     {
-        return (value_ == kLeftString)
-            || (value_ == kUpLeftString)
-            || (value_ == kDownLeftString);
+        return (value_ == DirectionValue::LEFT)
+            || (value_ == DirectionValue::UP_LEFT)
+            || (value_ == DirectionValue::DOWN_LEFT);
     }
 
     bool goesRight() const
     {
-        return (value_ == kRightString)
-            || (value_ == kUpRightString)
-            || (value_ == kDownRightString);
+        return (value_ == DirectionValue::RIGHT)
+            || (value_ == DirectionValue::UP_RIGHT)
+            || (value_ == DirectionValue::DOWN_RIGHT);
     }
 
-    std::string value_;
+    DirectionValue value_;
 };
 
 // Class to represent a position of Batman
 class Position
 {
 public:
-    Position(): x_(0), y_(0) {}
+    //Position(): x_(0), y_(0) {}
 
     Position(int x, int y): x_(x), y_(y) {}
-
-    Position(const Position & position):
-        x_(position.x_), y_(position.y_) {}
 
     std::string toString() const
     {
@@ -87,14 +87,15 @@ public:
         std::cerr << "Position = " << toString() << std::endl;
     }
 
-    int x_, y_;
+    int x_;
+    int y_;
 };
 
 // Class to represent the area to explore in the building
-class DiscoveryArea
+class ExplorationArea
 {
 public:
-    DiscoveryArea(int x1, int y1, int x2, int y2):
+    ExplorationArea(int x1, int y1, int x2, int y2):
         x1_(x1), y1_(y1), x2_(x2), y2_(y2) {}
 
     int getWidth() const
@@ -130,12 +131,12 @@ public:
 
     Position getCenter() const
     {
-        return Position(x1_ + getWidth() / 2, y1_ + getHeight() / 2);
+        return Position(x1_ + (getWidth()) / 2, y1_ + (getHeight()) / 2);
     }
 
     std::string toString() const
     {
-        return "DiscoveryArea = (" + std::to_string(x1_)
+        return "ExplorationArea = (" + std::to_string(x1_)
             + ", " + std::to_string(y1_)
             + ")-(" + std::to_string(x2_) + ", "
             + std::to_string(y2_)
@@ -148,7 +149,10 @@ public:
         std::cerr << toString() << std::endl;
     }
 
-    int x1_, y1_, x2_, y2_;
+    int x1_;
+    int y1_;
+    int x2_;
+    int y2_;
 };
 
 int main()
@@ -157,7 +161,7 @@ int main()
     int buildingWidth;
     int buildingHeight;
     std::cin >> buildingWidth >> buildingHeight; std::cin.ignore();
-    DiscoveryArea area(0, 0, buildingWidth - 1, buildingHeight - 1);
+    ExplorationArea area(0, 0, buildingWidth - 1, buildingHeight - 1);
 
     int numberOfRemainingTurns;
     std::cin >> numberOfRemainingTurns; std::cin.ignore();
@@ -175,10 +179,10 @@ int main()
         std::cin >> bombDirectionString; std::cin.ignore();
         Direction bombDirection(bombDirectionString);
 
-        // Update the discovery area
+        // Update the exploration area
         area.update(position, bombDirection);
 
-        // Compute the new position: we target the center of the discovery area
+        // Compute the new position: we target the center of the exploration area
         position = area.getCenter();
         std::cout << position.toString() << std::endl;
     }
